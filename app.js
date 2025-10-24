@@ -9,7 +9,10 @@ const {
 const { getUsers } = require("./controllers/users.controllers.js");
 const {
   getCommentsByArticleId,
+  postCommentByArticleId,
 } = require("./controllers/comments.controllers.js");
+
+app.use(express.json())
 
 app.get("/api/topics", getTopics);
 
@@ -21,11 +24,12 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
+app.post("/api/articles/:article_id/comments", postCommentByArticleId);
+
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
     res.status(err.status).send({ msg: err.msg });
   } else {
-    console.log(err);
     res.status(400).send({ msg: "You've made a Bad Request" });
   }
 });

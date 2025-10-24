@@ -168,3 +168,44 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Responds with the posted comment when valid", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "This is a test comment",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({
+          author: "butter_bridge",
+          body: "This is a test comment",
+          article_id: 1,
+          votes: 0,
+          comment_id: expect.any(Number),
+          created_at: expect.any(String),
+        });
+      });
+  });
+  test("400: Responds with an error if username or body is missing", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({ username: "butter_bridge" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Missing required fields: username and body");
+      });
+  });
+  test("404: Responds with error if article_id does not exist", () => {
+    const newComment = { username: "butter_bridge", body: "Hello!" };
+    return request(app)
+      .post("/api/articles/9999/comments")
+      .send(newComment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Request not found");
+      });
+  });
+});
