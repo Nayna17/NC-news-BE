@@ -26,4 +26,25 @@ exports.fetchArticleById = (article_id) => {
     });
 };
 
+exports.updateArticleVotes = (article_id, inc_votes) => {
+  if (typeof inc_votes !== "number") {
+    return Promise.reject({
+      status: 400,
+      msg: "Invalid input type for inc_votes",
+    });
+  }
+  return db
+    .query(
+      `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`,
+      [inc_votes, article_id]
+    )
+    .then(({ rows }) => {
+      const article = rows[0];
+      if (!article) {
+        return Promise.reject({ status: 404, msg: "Article not found" });
+      }
+      return article;
+    });
+};
+
 
