@@ -117,10 +117,11 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(body.comments).toBeInstanceOf(Array);
+        const comments = body.comments;
+        expect(comments).toBeInstanceOf(Array);
 
-        if (body.comments.length > 0) {
-          body.comments.forEach((comment) => {
+        if (comments.length > 0) {
+          comments.forEach((comment) => {
             expect(comment).toMatchObject({
               comment_id: expect.any(Number),
               votes: expect.any(Number),
@@ -131,6 +132,39 @@ describe("GET /api/articles/:article_id/comments", () => {
             });
           });
         }
+        for (let i = 0; i < comments.length - 1; i++) {
+          const currentDate = new Date(comments[i].created_at);
+          const nextDate = new Date(comments[i + 1].created_at);
+          expect(currentDate.getTime()).toBeGreaterThanOrEqual(
+            nextDate.getTime()
+          );
+        }
+      });
+  });
+  test("404: Responds with an error message when a request is made for an article_id that does not exist", () => {
+    return request(app)
+      .get("/api/articles/9000/comments")
+      .expect(404)
+      .then(({ body }) => {
+        const { msg } = body;
+        expect(msg).toBe("Request not found");
+      });
+  });
+  test("400: Responds with an error message when a request is made for an article_id that is invalid", () => {
+    return request(app)
+      .get("/api/articles/not-an-article/comments")
+      .expect(400)
+      .then(({ body }) => {
+        const { msg } = body;
+        expect(msg).toBe("You've made a Bad Request");
+      });
+  });
+  test("200: Responds with an empty array when the requested article exists but there are no comments", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments).toEqual([]);
       });
   });
 });
