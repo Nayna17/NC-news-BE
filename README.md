@@ -8,7 +8,7 @@ Create a file called .env.test and one called .env.developement.
 
 Inside .env.test write the following:
 
-PGDATABASE = test-data
+PGDATABASE=test-data
 
 Then do the same for .env.development, but instead write:
 
