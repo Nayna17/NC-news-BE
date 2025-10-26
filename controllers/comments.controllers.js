@@ -1,6 +1,7 @@
 const {
   fetchCommentsByArticleId,
   insertCommentByArticleId,
+  removeCommentById,
 } = require("../models/comments.models");
 
 exports.getCommentsByArticleId = (req, res) => {
@@ -22,6 +23,19 @@ exports.postCommentByArticleId = (req, res, next) => {
   insertCommentByArticleId(article_id, username, body)
     .then((comment) => {
       res.status(201).send({ comment });
+    })
+    .catch(next);
+};
+
+exports.deleteCommentById = (req, res, next) => {
+  const { comment_id } = req.params;
+
+  removeCommentById(comment_id)
+    .then((deleted) => {
+      if (!deleted) {
+        return Promise.reject({ status: 404, msg: "Comment not found" });
+      }
+      res.status(204).send();
     })
     .catch(next);
 };
