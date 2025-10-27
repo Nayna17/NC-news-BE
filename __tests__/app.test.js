@@ -40,14 +40,22 @@ describe("GET /api/articles", () => {
         const articles = body.articles;
         expect(articles.length > 0).toBe(true);
         articles.forEach((article) => {
-          const { title, topic, author, created_at, votes, article_img_url } =
-            article;
+          const {
+            title,
+            topic,
+            author,
+            created_at,
+            votes,
+            article_img_url,
+            comment_count,
+          } = article;
           expect(typeof title).toBe("string");
           expect(typeof topic).toBe("string");
           expect(typeof author).toBe("string");
           expect(typeof created_at).toBe("string");
           expect(typeof votes).toBe("number");
           expect(typeof article_img_url).toBe("string");
+          expect(typeof comment_count).toBe("number");
         });
       });
   });
@@ -310,6 +318,28 @@ describe("GET /api/articles (sorting queries)", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Invalid order query");
+      });
+  });
+});
+describe("GET /api/articles (topic queries)", () => {
+  test("200: Filters articles by topic", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+  test("404: Responds with error if topic not found", () => {
+    return request(app)
+      .get("/api/articles?topic=not_a_topic")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Topic not found");
       });
   });
 });
