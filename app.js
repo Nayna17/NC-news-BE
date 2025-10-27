@@ -14,6 +14,10 @@ const {
   deleteCommentById,
 } = require("./controllers/comments.controllers.js");
 
+app.get("/", (req, res) => {
+  res.send("server is running :)");
+});
+
 app.use(express.json());
 
 app.get("/api/topics", getTopics);
