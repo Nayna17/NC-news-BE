@@ -120,6 +120,26 @@ describe("GET /api/articles/:article_id", () => {
       });
   });
 });
+describe("GET /api/articles/:article_id (comment_count)", () => {
+  test("200: Responds with an article object including comment_count", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toHaveProperty("article_id", 1);
+        expect(article).toHaveProperty("title");
+        expect(article).toHaveProperty("topic");
+        expect(article).toHaveProperty("author");
+        expect(article).toHaveProperty("body");
+        expect(article).toHaveProperty("created_at");
+        expect(article).toHaveProperty("votes");
+        expect(article).toHaveProperty("article_img_url");
+        expect(article).toHaveProperty("comment_count");
+        expect(typeof article.comment_count).toBe("number");
+      });
+  });
+});
 describe("GET /api/articles/:article_id/comments", () => {
   test("200: Responds with array of comment objects for the requested article_id", () => {
     return request(app)

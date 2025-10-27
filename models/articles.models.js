@@ -49,16 +49,30 @@ exports.fetchArticles = (sort_by = "created_at", order = "desc", topic) => {
   });
 };
 
+
 exports.fetchArticleById = (article_id) => {
-  return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
-    .then(({ rows }) => {
-      const article = rows[0];
-      if (!article) {
-        return Promise.reject({ status: 404, msg: `Request not found` });
-      }
-      return article;
-    });
+  const queryStr = `SELECT
+      articles.article_id,
+      articles.title,
+      articles.topic,
+      articles.author,
+      articles.body,
+      articles.created_at,
+      articles.votes,
+      articles.article_img_url,
+      COUNT(comments.comment_id)::INT AS comment_count
+    FROM articles
+    LEFT JOIN comments ON comments.article_id = articles.article_id
+    WHERE articles.article_id = $1
+    GROUP BY articles.article_id;
+  `;
+  return db.query(queryStr, [article_id]).then(({ rows }) => {
+    const article = rows[0];
+    if (!article) {
+      return Promise.reject({ status: 404, msg: "Request not found" });
+    }
+    return article;
+  });
 };
 
 exports.updateArticleVotes = (article_id, inc_votes) => {
