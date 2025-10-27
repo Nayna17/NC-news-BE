@@ -14,11 +14,6 @@ const {
   deleteCommentById,
 } = require("./controllers/comments.controllers.js");
 
-app.get("/api/articles", (req, res) => {
-  console.log("GET /api/articles hit!");
-  res.send({ msg: "Route works" });
-});
-
 app.use(express.json());
 
 app.get("/api/topics", getTopics);
