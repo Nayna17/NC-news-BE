@@ -3,6 +3,7 @@ const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
 const request = require("supertest");
 const app = require("../app");
+require("jest-sorted");
 
 beforeEach(() => {
   return seed(data);
@@ -273,6 +274,42 @@ describe("DELETE /api/comments/:comment_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Invalid comment ID");
+      });
+  });
+});
+describe("GET /api/articles (sorting queries)", () => {
+  test("200: Responds with sorted articles by valid column and defaults to desc order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeSortedBy("title", { descending: true });
+      });
+  });
+  test("200: Sorts articles by valid column and asc order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeSortedBy("votes", { descending: false });
+      });
+  });
+  test("400: Responds with an error for invalid sort_by query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=not_a_column")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid sort_by query");
+      });
+  });
+  test("400: Responds with an error for invalid order", () => {
+    return request(app)
+      .get("/api/articles?order=random")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid order query");
       });
   });
 });

@@ -1,28 +1,42 @@
 const db = require("../db/connection");
 
-exports.fetchArticles = () => {
-  return db
-    .query(
-      `SELECT 
-    article_id, title, topic, author, created_at, votes, article_img_url 
-    FROM articles 
-    ORDER BY articles.created_at DESC`
-    )
-    .then(({ rows }) => {
-      return { articles: rows };
-    });
-};
+exports.fetchArticles = (sort_by = "created_at", order = "desc") => {
+  const validColumns = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "created_at",
+    "votes",
+    "article_img_url",
+  ];
+  const validOrders = ["asc", "desc"];
 
+  if (!validColumns.includes(sort_by)) {
+    return Promise.reject({ status: 400, msg: "Invalid sort_by query" });
+  }
+  if (!validOrders.includes(order.toLowerCase())) {
+    return Promise.reject({ status: 400, msg: "Invalid order query" });
+  }
+
+  const query = `SELECT
+  article_id, title, topic, author, created_at, votes, article_img_url
+  FROM articles
+  ORDER BY ${sort_by} ${order.toUpperCase()}`;
+  return db.query(query).then(({ rows }) => {
+    return { articles: rows };
+  });
+};
 
 exports.fetchArticleById = (article_id) => {
   return db
     .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
     .then(({ rows }) => {
       const article = rows[0];
-      if(!article) {
-        return Promise.reject({status: 404, msg: `Request not found`,})
+      if (!article) {
+        return Promise.reject({ status: 404, msg: `Request not found` });
       }
-      return article
+      return article;
     });
 };
 
@@ -46,5 +60,3 @@ exports.updateArticleVotes = (article_id, inc_votes) => {
       return article;
     });
 };
-
-

@@ -4,10 +4,13 @@ const {
   updateArticleVotes,
 } = require("../models/articles.models");
 
-exports.getArticles = (req, res) => {
-  return fetchArticles().then((articles) => {
-    res.status(200).send(articles);
-  });
+exports.getArticles = (req, res, next) => {
+  const { sort_by, order } = req.query;
+  return fetchArticles(sort_by, order)
+    .then(({ articles }) => {
+      res.status(200).send({ articles });
+    })
+    .catch(next);
 };
 
 exports.getArticleById = (req, res) => {
